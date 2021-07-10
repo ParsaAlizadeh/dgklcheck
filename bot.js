@@ -18,7 +18,9 @@ function replyTo(msg) {
 }
 
 function renderPrice(price) {
-    if (price == 0)
+    if (price === null)
+        return 'نامشخص'
+    if (price === 0)
         return 'ناموجود';
     return `${price.toLocaleString('fa-IR')} تومان`;
 }

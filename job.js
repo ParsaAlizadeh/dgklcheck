@@ -6,13 +6,14 @@ export class Job {
     static priceReg = /"price": ?(\d+)/;
     static index = 1;
 
-    constructor(owner, url, lastPrice=0) {
+    constructor(owner, url, lastPrice=null) {
         this.id = Job.index++;
         this.owner = owner;
         this.url = url;
         this.lastPrice = lastPrice;
+        this.fakezero = false;
     }
-    async getPrice() {
+    async getPriceUpdate() {
         try {
             const resp = await axios.get(this.url);
             const match = resp.data.match(Job.priceReg);
@@ -25,13 +26,18 @@ export class Job {
     }
     async run(callback) {
         console.log(new Date, `Job ${this.id} started`);
-        
-        const currentPrice = await this.getPrice();
-        if (currentPrice != this.lastPrice) {
-            callback(this, currentPrice);
-        } 
-        this.lastPrice = currentPrice;
-        
+        const currentPrice = await this.getPriceUpdate();
+        const commit = () => {
+            if (this.lastPrice !== currentPrice)
+                callback(this, currentPrice);
+            this.lastPrice = currentPrice;
+        }
+        if (!this.fakezero && currentPrice === 0) {
+            this.fakezero = true;
+        } else {
+            this.fakezero = false;
+            commit();
+        }
         console.log(new Date, `Job ${this.id} ended`);
     }
     toJSON() {
