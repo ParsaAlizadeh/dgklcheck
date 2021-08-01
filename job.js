@@ -6,11 +6,12 @@ export class Job {
     static priceReg = /"price": ?(\d+)/;
     static index = 1;
 
-    constructor(owner, url, lastPrice=null) {
+    constructor(owner, url, lastPrice=null, silent=false) {
         this.id = Job.index++;
         this.owner = owner;
         this.url = url;
         this.lastPrice = lastPrice;
+        this.silent = silent;
     }
     async getPriceUpdate() {
         try {
@@ -38,11 +39,13 @@ export class Job {
         return {
             owner: this.owner,
             url: this.url,
-            lastPrice: this.lastPrice
+            lastPrice: this.lastPrice,
+            silent: this.silent,
         }
     }
     static fromJSON(json) {
-        return new Job(json.owner, json.url, json.lastPrice);
+        const silent = json.silent ?? false;
+        return new Job(json.owner, json.url, json.lastPrice, silent);
     }
 }
 
