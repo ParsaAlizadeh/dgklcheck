@@ -14,7 +14,10 @@ const jobmanager = new JobManager(interval, dataFile, dataInterval);
 const bot = new TelegramBot(token, {polling: true});
 
 function replyTo(msg) {
-    return {reply_to_message_id: msg.message_id};
+    return {
+        reply_to_message_id: msg.message_id,
+        allow_sending_without_reply: true
+    };
 }
 
 function renderPrice(price) {
@@ -26,12 +29,21 @@ function renderPrice(price) {
 }
 
 jobmanager.on('change', (job, currentPrice) => {
-    const resp =
+    let resp =
         `<a href="${job.url}">تغییر قیمت کالا</a>\n` +
         `از ${renderPrice(job.lastPrice)}\n` +
         `به ${renderPrice(currentPrice)}\n` +
-        `غیرفعال کردن با /rm_${job.id}`;
-    bot.sendMessage(job.owner, resp, {parse_mode: 'HTML'});
+        `/rm_${job.id} غیرفعال کردن\n`;
+    if (job.silent) {
+        resp += `/unsilent_${job.id} صدادار کردن`;
+    } else {
+        resp += `/silent_${job.id} بی‌صدا کردن`;
+    }
+    const options = {
+        parse_mode: 'HTML',
+        disable_notification: job.silent,
+    };
+    bot.sendMessage(job.owner, resp, options);
 });
 
 jobmanager.on('show', (joblist) => {
