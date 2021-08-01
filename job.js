@@ -11,7 +11,6 @@ export class Job {
         this.owner = owner;
         this.url = url;
         this.lastPrice = lastPrice;
-        this.fakezero = false;
     }
     async getPriceUpdate() {
         try {
@@ -32,16 +31,15 @@ export class Job {
                 callback(this, currentPrice);
             this.lastPrice = currentPrice;
         }
-        if (!this.fakezero && currentPrice === 0) {
-            this.fakezero = true;
-        } else {
-            this.fakezero = false;
-            commit();
-        }
+        commit();
         console.log(new Date, `Job ${this.id} ended`);
     }
     toJSON() {
-        return {owner: this.owner, url: this.url, lastPrice: this.lastPrice}
+        return {
+            owner: this.owner,
+            url: this.url,
+            lastPrice: this.lastPrice
+        }
     }
     static fromJSON(json) {
         return new Job(json.owner, json.url, json.lastPrice);
