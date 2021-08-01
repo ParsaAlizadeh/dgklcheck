@@ -6,12 +6,12 @@ export class Job {
     static priceReg = /"price": ?(\d+)/;
     static index = 1;
 
-    constructor(owner, url, lastPrice=null) {
+    constructor(owner, url, lastPrice=null, silent=false) {
         this.id = Job.index++;
         this.owner = owner;
         this.url = url;
         this.lastPrice = lastPrice;
-        this.fakezero = false;
+        this.silent = silent;
     }
     async getPriceUpdate() {
         try {
@@ -32,19 +32,20 @@ export class Job {
                 callback(this, currentPrice);
             this.lastPrice = currentPrice;
         }
-        if (!this.fakezero && currentPrice === 0) {
-            this.fakezero = true;
-        } else {
-            this.fakezero = false;
-            commit();
-        }
+        commit();
         console.log(new Date, `Job ${this.id} ended`);
     }
     toJSON() {
-        return {owner: this.owner, url: this.url, lastPrice: this.lastPrice}
+        return {
+            owner: this.owner,
+            url: this.url,
+            lastPrice: this.lastPrice,
+            silent: this.silent,
+        }
     }
     static fromJSON(json) {
-        return new Job(json.owner, json.url, json.lastPrice);
+        const silent = json.silent ?? false;
+        return new Job(json.owner, json.url, json.lastPrice, silent);
     }
 }
 
