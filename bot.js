@@ -84,7 +84,10 @@ const addLink = userGuard((msg, match) => {
     const url = match[0];
     const job = new Job(chatId, url);
     jobmanager.addJob(job);
-    const resp = `اضافه شد\nغیرفعال کردن با /rm_${job.id}`;
+    const resp =
+        `اضافه شد\n` +
+        `/rm_${job.id} غیرفعال کردن\n` +
+        `/mute_${job.id} بی‌صدا کردن`;
     bot.sendMessage(chatId, resp, replyTo(msg));
 });
 
