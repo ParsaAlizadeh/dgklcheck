@@ -28,17 +28,22 @@ function renderPrice(price) {
     return `${price.toLocaleString('fa-IR')} تومان`;
 }
 
-jobmanager.on('change', (job, currentPrice) => {
-    let resp =
-        `<a href="${job.url}">تغییر قیمت کالا</a>\n` +
-        `از ${renderPrice(job.lastPrice)}\n` +
-        `به ${renderPrice(currentPrice)}\n` +
-        `/rm_${job.id} غیرفعال کردن\n`;
+function renderKeyboard(job) {
+    let resp = `/rm_${job.id} غیرفعال کردن\n`;
     if (job.silent) {
         resp += `/unmute_${job.id} صدادار کردن`;
     } else {
-        resp += `/mute_${job.id} بی‌صدا کردن`;
+        resp += `/mute_${job.id} بی‌صدا کردن`
     }
+    return resp;
+}
+
+jobmanager.on('change', (job, currentPrice) => {
+    const resp =
+        `<a href="${job.url}">تغییر قیمت کالا</a>\n` +
+        `از ${renderPrice(job.lastPrice)}\n` +
+        `به ${renderPrice(currentPrice)}\n` +
+        renderKeyboard(job);
     const options = {
         parse_mode: 'HTML',
         disable_notification: job.silent,
@@ -48,7 +53,10 @@ jobmanager.on('change', (job, currentPrice) => {
 
 jobmanager.on('show', (joblist) => {
     for (const job of joblist) {
-        const resp = `<a href="${job.url}">کالای ${job.id}:</a> ${renderPrice(job.lastPrice)}`;
+        const resp =
+            `<a href="${job.url}">کالای ${job.id}: </a>` +
+            `${renderPrice(job.lastPrice)}\n` +
+            renderKeyboard(job);
         bot.sendMessage(job.owner, resp, {parse_mode: 'HTML'});
     }
 });
@@ -84,10 +92,7 @@ const addLink = userGuard((msg, match) => {
     const url = match[0];
     const job = new Job(chatId, url);
     jobmanager.addJob(job);
-    const resp =
-        `اضافه شد\n` +
-        `/rm_${job.id} غیرفعال کردن\n` +
-        `/mute_${job.id} بی‌صدا کردن`;
+    const resp = `اضافه شد\n` + renderKeyboard(job);
     bot.sendMessage(chatId, resp, replyTo(msg));
 });
 
