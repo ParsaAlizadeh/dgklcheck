@@ -51,13 +51,14 @@ jobmanager.on('change', (job, currentPrice) => {
     bot.sendMessage(job.owner, resp, options);
 });
 
-jobmanager.on('show', (joblist) => {
+jobmanager.on('show', async (joblist) => {
+    joblist.sort((j1, j2) => j1.id - j2.id);
     for (const job of joblist) {
         const resp =
             `<a href="${job.url}">کالای ${job.id}: </a>` +
             `${renderPrice(job.lastPrice)}\n` +
             renderKeyboard(job);
-        bot.sendMessage(job.owner, resp, {parse_mode: 'HTML'});
+        await bot.sendMessage(job.owner, resp, {parse_mode: 'HTML'});
     }
 });
 
